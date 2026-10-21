@@ -1,0 +1,24 @@
+{
+  "name": "api-sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "API Sentinel - Full-stack API monitoring and observability platform",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm --workspace=@api-sentinel/backend run build",
+    "test": "npm --workspace=@api-sentinel/backend run test",
+    "dev:backend": "npm --workspace=@api-sentinel/backend run dev",
+    "migrate:backend": "npm --workspace=@api-sentinel/backend run migrate"
+  },
+  "keywords": [
+    "api-monitoring",
+    "observability",
+    "uptime",
+    "incidents"
+  ],
+  "author": "",
+  "license": "ISC"
+}
