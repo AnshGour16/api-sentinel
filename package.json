@@ -8,9 +8,11 @@
     "frontend"
   ],
   "scripts": {
-    "build": "npm --workspace=@api-sentinel/backend run build",
+    "build": "npm --workspace=@api-sentinel/backend run build && npm --workspace=@api-sentinel/frontend run build",
     "test": "npm --workspace=@api-sentinel/backend run test",
     "dev:backend": "npm --workspace=@api-sentinel/backend run dev",
+    "dev:frontend": "npm --workspace=@api-sentinel/frontend run dev",
+    "build:frontend": "npm --workspace=@api-sentinel/frontend run build",
     "migrate:backend": "npm --workspace=@api-sentinel/backend run migrate"
   },
   "keywords": [

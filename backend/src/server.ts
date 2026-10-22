@@ -4,10 +4,17 @@ import { env } from './config/env';
 import { closeDatabase } from './lib/db';
 import { closeRedis } from './lib/redis';
 import { logger } from './lib/logger';
+import { startCheckWorker, closeCheckWorker } from './workers/check.worker';
+import { closeCheckQueue } from './queues/check.queue';
+import { monitorScheduler } from './scheduler/monitor.scheduler';
+import { initSocketServer, closeSocketServer } from './lib/socket';
 
 const server = http.createServer(app);
 
 function startServer(): void {
+  // Initialize authenticated Socket.IO server
+  initSocketServer(server);
+
   server.listen(env.PORT, () => {
     logger.info(
       {
@@ -17,6 +24,14 @@ function startServer(): void {
       },
       `API Sentinel server started successfully on port ${env.PORT}`
     );
+
+    // Start background monitoring worker and scheduler
+    try {
+      startCheckWorker();
+      monitorScheduler.start();
+    } catch (err) {
+      logger.error({ err }, 'Failed to start background worker or scheduler');
+    }
   });
 }
 
@@ -38,7 +53,15 @@ export async function gracefulShutdown(signal: string): Promise<void> {
   forceExitTimeout.unref();
 
   try {
-    // 1. Stop accepting new HTTP requests
+    // 1. Stop scheduler and background workers first
+    monitorScheduler.stop();
+    await closeCheckWorker();
+    await closeCheckQueue();
+
+    // 2. Close Socket.IO connections
+    await closeSocketServer();
+
+    // 3. Stop accepting new HTTP requests
     await new Promise<void>((resolve, reject) => {
       server.close((err) => {
         if (err) return reject(err);
@@ -47,10 +70,10 @@ export async function gracefulShutdown(signal: string): Promise<void> {
       });
     });
 
-    // 2. Close Redis client
+    // 3. Close Redis client
     await closeRedis();
 
-    // 3. Close PostgreSQL pool
+    // 4. Close PostgreSQL pool
     await closeDatabase();
 
     logger.info('Graceful shutdown completed successfully');

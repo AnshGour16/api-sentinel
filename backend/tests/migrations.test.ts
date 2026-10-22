@@ -56,6 +56,7 @@ describe('Database Migration Suite', () => {
     const result = await runMigrations(migrationsDir);
 
     expect(result.applied).toContain('001_initial_schema.sql');
+    expect(result.applied).toContain('002_add_check_execution_id.sql');
     expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
     expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     expect(mockClient.release).toHaveBeenCalled();
@@ -65,7 +66,7 @@ describe('Database Migration Suite', () => {
     const mockClient = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('SELECT name FROM schema_migrations')) {
-          return { rows: [{ name: '001_initial_schema.sql' }] };
+          return { rows: [{ name: '001_initial_schema.sql' }, { name: '002_add_check_execution_id.sql' }] };
         }
         return { rows: [] };
       }),
@@ -78,6 +79,7 @@ describe('Database Migration Suite', () => {
 
     expect(result.applied.length).toBe(0);
     expect(result.alreadyApplied).toContain('001_initial_schema.sql');
+    expect(result.alreadyApplied).toContain('002_add_check_execution_id.sql');
     expect(mockClient.release).toHaveBeenCalled();
   });
 });

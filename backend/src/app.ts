@@ -7,6 +7,8 @@ import { requestIdMiddleware } from './middleware/request-id';
 import { errorHandlerMiddleware } from './middleware/error-handler';
 import { notFoundMiddleware } from './middleware/not-found';
 import { healthRouter } from './modules/health/health.routes';
+import { authRouter } from './modules/auth/auth.routes';
+import { monitorsRouter } from './modules/monitors/monitors.routes';
 
 export function createApp(): Express {
   const app = express();
@@ -55,6 +57,10 @@ export function createApp(): Express {
   // Health routes mounted at /health and /api/v1/health
   app.use('/health', healthRouter);
   app.use('/api/v1/health', healthRouter);
+
+  // Auth and Monitor API routes
+  app.use('/api/v1/auth', authRouter);
+  app.use('/api/v1/monitors', monitorsRouter);
 
   // 404 handler
   app.use(notFoundMiddleware);
